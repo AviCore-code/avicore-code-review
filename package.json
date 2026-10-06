@@ -1,0 +1,16 @@
+{
+  "name": "ai-code-review",
+  "version": "1.0.0",
+  "description": "AI-powered code review tool with severity-labeled comments and risk scoring",
+  "main": "index.js",
+  "scripts": {
+    "review": "node index.js",
+    "test": "node index.js --test"
+  },
+  "keywords": ["code-review", "static-analysis", "git-diff", "risk-scoring"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
