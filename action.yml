@@ -1,0 +1,40 @@
+name: 'AI Code Review'
+description: 'AI-powered code review with severity labels and risk scoring'
+author: 'AviCore'
+branding:
+  icon: 'check-circle'
+  color: 'purple'
+
+inputs:
+  github-token:
+    description: 'GitHub token'
+    required: true
+  fail-on-critical:
+    description: 'Fail the build on critical issues'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Run AI Code Review
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        FAIL_ON_CRITICAL: ${{ inputs.fail-on-critical }}
+      run: |
+        git diff origin/${{ github.base_ref }}...HEAD > /tmp/review.diff
+        node ${{ github.action_path }}/index.js /tmp/review.diff --json > /tmp/review.json
+        cat /tmp/review.json
+        if [ "$FAIL_ON_CRITICAL" = "true" ]; then
+          CRITICAL=$(node -e "const r=require('/tmp/review.json'); process.exit(r.riskScore.severityCounts.Critical > 0 ? 1 : 0)")
+          if [ "$CRITICAL" = "1" ]; then
+            echo "::error::Critical issues found. See review for details."
+            exit 1
+          fi
+        fi
